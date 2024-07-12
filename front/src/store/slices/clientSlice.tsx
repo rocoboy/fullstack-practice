@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store'; // Asegúrate de importar AppThunk y RootState
 
 export interface Client {
+  id: number;
   firstname: string;
   lastname: string;
   email: string;
