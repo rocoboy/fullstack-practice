@@ -22,7 +22,10 @@ const clientSlice = createSlice({
   initialState,
   reducers: {
     addClient: (state, action: PayloadAction<Client>) => {
-      state.clients.push(action.payload);
+      const emailExists = state.clients.some(client => client.email === action.payload.email);
+      if (!emailExists) {
+        state.clients.push(action.payload);
+      }
     },
     updateClient: (state, action: PayloadAction<{ email: string; updatedClient: Client }>) => {
       const index = state.clients.findIndex(client => client.email === action.payload.email);

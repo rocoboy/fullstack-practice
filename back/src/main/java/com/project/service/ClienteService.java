@@ -32,8 +32,10 @@ public class ClienteService {
 
         if (clienteExistenteOptional.isPresent()) {
             Cliente clienteExistente = clienteExistenteOptional.get();
-            clienteExistente.setNombre(cliente.getNombre()); // Actualiza los campos necesarios
-            clienteExistente.setApellido(cliente.getApellido());
+            clienteExistente.setFirstname(cliente.getFirstname()); // Actualiza los campos necesarios
+            clienteExistente.setLastname(cliente.getLastname());
+            clienteExistente.setEmail(cliente.getEmail());
+            clienteExistente.setAge(cliente.getAge());
             // Podes actualizar otros campos según sea necesario
 
             return clienteRepository.save(clienteExistente); // Guarda y devuelve el cliente actualizado
@@ -49,5 +51,10 @@ public class ClienteService {
 
     public Optional<Long> obtenerIdPorEmail(String email) {
         return clienteRepository.findIdByEmail(email);
+    }
+
+    // Método para obtener un cliente por email
+    public Optional<Cliente> obtenerPorEmail(String email) {
+        return clienteRepository.findByEmail(email);
     }
 }

@@ -26,24 +26,35 @@ public class Cliente {
 
     private Integer age;
 
-    public Object getNombre() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getNombre'");
+    public String getFirstname() {
+        return this.firstname;
     }
 
-    public Object getApellido() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getApellido'");
+    public String getLastname() {
+        return this.lastname;
     }
 
-    public void setNombre(Object nombre) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setNombre'");
+    public String getEmail() {
+        return this.email;
     }
 
-    public void setApellido(Object apellido) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setApellido'");
+    public Integer getAge() {
+        return this.age;
     }
 
+    public void setFirstname(String nombre) {
+        this.firstname = nombre;
+    }
+
+    public void setLastname(String apellido) {
+        this.lastname = apellido;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
 }

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/clientes")
@@ -30,9 +29,19 @@ public class ClienteController {
 
     @PostMapping
     public ResponseEntity<Cliente> crearCliente(@RequestBody ClienteDTO clienteDTO) {
+
+        Optional<Cliente> clienteExistente = clienteService.obtenerPorEmail(clienteDTO.getEmail());
+        if (clienteExistente.isPresent()) {
+            // Si ya existe un cliente con este email, devolver un ResponseEntity de
+            // conflicto
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
         Cliente nuevoCliente = new Cliente();
-        nuevoCliente.setNombre(clienteDTO.getNombre());
-        nuevoCliente.setApellido(clienteDTO.getApellido());
+        nuevoCliente.setFirstname(clienteDTO.getFirstname());
+        nuevoCliente.setLastname(clienteDTO.getLastname());
+        nuevoCliente.setEmail(clienteDTO.getEmail());
+        nuevoCliente.setAge(clienteDTO.getAge());
         // Configura otros campos según sea necesario
 
         Cliente clienteCreado = clienteService.crear(nuevoCliente);
@@ -73,14 +82,4 @@ public class ClienteController {
         clienteService.eliminarCliente(id);
         return ResponseEntity.noContent().build();
     }
-
-    // Endpoint para obtener el ID de un cliente por su email
-    @GetMapping("/id")
-    public ResponseEntity<Long> obtenerIdClientePorEmail(@RequestParam String email) {
-        Optional<Long> clienteId = clienteService.obtenerIdPorEmail(email);
-
-        return clienteId.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
 }

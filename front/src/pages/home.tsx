@@ -10,7 +10,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { useEffect, useState } from "react";
 import { addClients, deleteClient } from "../store/slices/clientSlice";
-import { fetchAllClients } from "../lib/clients";
+import { eliminarCliente, fetchAllClients } from "../lib/clients";
 import EditClientModal from "../components/EditClientModal";
 import { Client } from "../models/Client";
 
@@ -23,6 +23,7 @@ export default function Home(){
         firstname: "",
         lastname: "",
         age: 0,
+        id: 0
     }
     const [selectedClient, setSelectedClient] = useState<Client>(emptyClient);
     const [openModal, setOpenModal] = useState(false);
@@ -45,8 +46,8 @@ export default function Home(){
     }, [clients.length, dispatch]);
       
 
-    const handleEdit = (email: string) => {
-        const client = clients.find((client) => client.email === email);
+    const handleEdit = (id: number) => {
+        const client = clients.find((client) => client.id === id);
         if (client){
           setSelectedClient(client);
           setOpenModal(true);
@@ -54,8 +55,12 @@ export default function Home(){
       };
       
     
-    const handleDelete = (email: string) => {
-        dispatch(deleteClient(email));
+    const handleDelete = async (id: number) => {
+        const client = clients.find((client) => client.id === id);
+        if (client){
+            dispatch(deleteClient(client.email));
+            await eliminarCliente(client.id);
+        }
     };
     
     const handleCloseModal = () => {
@@ -81,8 +86,8 @@ export default function Home(){
                 </TableRow>
                 </TableHead>
                 <TableBody>
-                {clients.map((row, index) => (
-                    <TableRow key={index + 10} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                {clients.map((row) => (
+                    <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell component="th" scope="row">
                         {row.firstname}
                     </TableCell>
@@ -90,10 +95,10 @@ export default function Home(){
                     <TableCell align="center">{row.email}</TableCell>
                     <TableCell align="center">{row.age}</TableCell>
                     <TableCell align="center">
-                        <Button variant="contained" color="primary" sx={{margin:"10px"}} onClick={() => handleEdit(row.email)}>
+                        <Button variant="contained" color="primary" sx={{margin:"10px"}} onClick={() => handleEdit(row.id)}>
                             Editar
                         </Button>
-                        <Button variant="contained" color="error" sx={{margin:"10px"}} onClick={() => handleDelete(row.email)}>
+                        <Button variant="contained" color="error" sx={{margin:"10px"}} onClick={() => handleDelete(row.id)}>
                             Eliminar
                         </Button>
                     </TableCell>

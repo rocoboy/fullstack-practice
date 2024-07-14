@@ -1,7 +1,4 @@
 import { Client } from "../models/Client";
-import clientsData from "../mocks/clients.json"
-
-const clients: Client[] = clientsData as Client[];
 
 export async function fetchAllClients(): Promise<Client[] | undefined> {
     try {
@@ -10,7 +7,6 @@ export async function fetchAllClients(): Promise<Client[] | undefined> {
         throw new Error('Network response was not ok');
       }
       const clientes: Client[] = await response.json(); // Parsea la respuesta como JSON
-      console.log("CLIENTES: ", clientes);
       return clientes; // Retorna la lista de clientes obtenida
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -20,7 +16,7 @@ export async function fetchAllClients(): Promise<Client[] | undefined> {
 
   export async function crearCliente(cliente: Client) {
     try {
-        const response = await fetch('http://localhost:8080/api/clientes', {
+        const response = await fetch('http://localhost:8080/clientes', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -40,9 +36,9 @@ export async function fetchAllClients(): Promise<Client[] | undefined> {
     }
 }
 
-export async function editarCliente(email: string, cliente: Client) {
+export async function editarCliente(id: number, cliente: Client) {
   try {
-      const response = await fetch(`http://localhost:8080/api/clientes/${email}`, {
+      const response = await fetch(`http://localhost:8080/clientes/${id}`, {
           method: 'PUT',
           headers: {
               'Content-Type': 'application/json'
@@ -62,9 +58,9 @@ export async function editarCliente(email: string, cliente: Client) {
   }
 }
 
-export async function eliminarCliente(email: string) {
+export async function eliminarCliente(id: number) {
   try {
-      const response = await fetch(`http://localhost:8080/api/clientes/${email}`, {
+      const response = await fetch(`http://localhost:8080/clientes/${id}`, {
           method: 'DELETE'
       });
       

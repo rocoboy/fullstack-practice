@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Modal, Box, TextField, Typography } from '@mui/material';
 import { updateClient, addClient } from "../store/slices/clientSlice";
-import { fetchClientByEmail } from '../lib/clients';
 import { Client } from '../models/Client';
+import { crearCliente, editarCliente } from '../lib/clients';
 
 interface EditClientModalProps {
   open: boolean;
@@ -14,22 +14,34 @@ interface EditClientModalProps {
 
 export default function EditClientModal ({open, onClose, editedClient, setEditedClient} : EditClientModalProps) {
   const dispatch = useDispatch();
-
+  const [message, setMessage] = useState<string>("");
+  const isNewClient = editedClient.id == 0;
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setEditedClient((prevState: any) => ({
       ...prevState,
       [name]: value
     }));
+    setMessage("");
   };
 
   const handleSave = async () => {
-    if (await fetchClientByEmail(editedClient.email)){
-        dispatch(updateClient({ email: editedClient.email, updatedClient: editedClient }));
+    if (isNewClient){
+      editedClient.id = 1;
+      dispatch(addClient(editedClient));
+      try{
+        await crearCliente(editedClient);
+      } catch(error: any){
+        setMessage(error.toString());
+      }
     } else{
-        dispatch(addClient(editedClient));
+        dispatch(updateClient({ email: editedClient.email, updatedClient: editedClient }));
+        try{
+          await editarCliente(editedClient.id, editedClient);
+        } catch(error: any){
+          setMessage(error.toString());
+        }
     }
-
     onClose();
   };
 
@@ -86,6 +98,9 @@ export default function EditClientModal ({open, onClose, editedClient, setEdited
           onChange={handleChange}
           sx={{ mb: 2 }}
         />
+        <Typography  sx={{color:"black", margin:"5px"}}>
+          {message}
+        </Typography>
         <Button variant="contained" onClick={handleSave}>
           Guardar
         </Button>
