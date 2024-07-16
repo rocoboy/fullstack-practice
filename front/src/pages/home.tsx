@@ -13,10 +13,12 @@ import { addClients, deleteClient } from "../store/slices/clientSlice";
 import { eliminarCliente, fetchAllClients } from "../lib/clients";
 import EditClientModal from "../components/EditClientModal";
 import { Client } from "../models/Client";
+import { fetchPictureById } from "../lib/profilePictures";
 
 export default function Home(){
 
     const clients = useSelector((state: RootState) => state.client.clients);
+    const [imagen, setImagen] = useState<string>("");
     const dispatch = useDispatch();
     const emptyClient: Client = {
         email: "",
@@ -27,6 +29,7 @@ export default function Home(){
     }
     const [selectedClient, setSelectedClient] = useState<Client>(emptyClient);
     const [openModal, setOpenModal] = useState(false);
+    const [imagenCargada, setImagenCargada] = useState(false);
 
     useEffect(() => {
         const getClients = async () => {
@@ -46,13 +49,40 @@ export default function Home(){
     }, [clients.length, dispatch]);
       
 
+    useEffect(() => {
+        const getImagen = async () => {
+            try {
+              const blob = await fetchPictureById(1);
+              if (blob) {
+                setImagenCargada(true);
+                setImagen(URL.createObjectURL(blob));
+              }
+            } catch (error) {
+              console.error('Error al obtener la imagen:', error);
+            }
+          };
+      
+        if (!imagenCargada) {
+          getImagen();
+        }
+
+        // Liberar la URL de objeto cuando el componente se desmonte
+        return () => {
+            if (imagenCargada) {
+            URL.revokeObjectURL(imagen);
+            }
+        };
+
+      }, [imagenCargada]);
+
+      
     const handleEdit = (id: number) => {
         const client = clients.find((client) => client.id === id);
         if (client){
           setSelectedClient(client);
           setOpenModal(true);
         }
-      };
+    };
       
     
     const handleDelete = async (id: number) => {
@@ -112,6 +142,8 @@ export default function Home(){
             <Button variant="contained"  sx={{margin:"10px", backgroundColor:"green"}} onClick={() => handleCreate()}>
                  Agregar Cliente
             </Button>
+
+            <img src={imagen} alt="Imagen" style={{ maxWidth: '100%' }} />
 
             {/* Modal para editar cliente */}
             {selectedClient && 
