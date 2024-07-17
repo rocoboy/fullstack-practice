@@ -18,7 +18,6 @@ import { fetchPictureById } from "../lib/profilePictures";
 export default function Home(){
 
     const clients = useSelector((state: RootState) => state.client.clients);
-    const [imagen, setImagen] = useState<string>("");
     const dispatch = useDispatch();
     const emptyClient: Client = {
         email: "",
@@ -29,7 +28,7 @@ export default function Home(){
     }
     const [selectedClient, setSelectedClient] = useState<Client>(emptyClient);
     const [openModal, setOpenModal] = useState(false);
-    const [imagenCargada, setImagenCargada] = useState(false);
+    const [images, setImages] = useState<{ [key: number]: string }>({});
 
     useEffect(() => {
         const getClients = async () => {
@@ -48,34 +47,22 @@ export default function Home(){
         }
     }, [clients.length, dispatch]);
       
-
     useEffect(() => {
-        const getImagen = async () => {
-            try {
-              const blob = await fetchPictureById(1);
-              if (blob) {
-                setImagenCargada(true);
-                setImagen(URL.createObjectURL(blob));
-              }
-            } catch (error) {
-              console.error('Error al obtener la imagen:', error);
-            }
-          };
-      
-        if (!imagenCargada) {
-          getImagen();
-        }
+      const loadImages = async () => {
+        const imageMap: { [key: number]: string } = {};
 
-        // Liberar la URL de objeto cuando el componente se desmonte
-        return () => {
-            if (imagenCargada) {
-            URL.revokeObjectURL(imagen);
-            }
-        };
+        await Promise.all(
+          clients.map(async (client) => {
+            const image = await fetchPictureById(client.id);
+            imageMap[client.id] = image ?? '';
+          })
+        );
+        setImages(imageMap);
+      };
+  
+      loadImages();
+    }, [clients]);
 
-      }, [imagenCargada]);
-
-      
     const handleEdit = (id: number) => {
         const client = clients.find((client) => client.id === id);
         if (client){
@@ -108,6 +95,7 @@ export default function Home(){
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                 <TableRow>
+                  <TableCell align="center">Profile Picture</TableCell>
                     <TableCell align="center">First name</TableCell>
                     <TableCell align="center">Last name</TableCell>
                     <TableCell align="center">Email</TableCell>
@@ -118,6 +106,13 @@ export default function Home(){
                 <TableBody>
                 {clients.map((row) => (
                     <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell component="th" scope="row">
+                    {images[row.id] ? (
+                    <img src={`data:image/jpeg;base64,${images[row.id]}`} alt={`Imagen de ${row.firstname}`} style={{ maxWidth: '80px' }} />
+                  ) : (
+                    'Cargando...'
+                  )}
+                    </TableCell>
                     <TableCell component="th" scope="row">
                         {row.firstname}
                     </TableCell>
@@ -143,8 +138,6 @@ export default function Home(){
                  Agregar Cliente
             </Button>
 
-            <img src={imagen} alt="Imagen" style={{ maxWidth: '100%' }} />
-
             {/* Modal para editar cliente */}
             {selectedClient && 
             <EditClientModal
@@ -153,6 +146,7 @@ export default function Home(){
                 editedClient={selectedClient}
                 setEditedClient={setSelectedClient}
             />}
+            
         </Box>
     );
 }

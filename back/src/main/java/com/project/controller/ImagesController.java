@@ -13,13 +13,15 @@ import java.util.Base64;
 import javax.sql.rowset.serial.SerialException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/images")
@@ -42,5 +44,28 @@ public class ImagesController {
         Blob blob = new javax.sql.rowset.serial.SerialBlob(bytes);
         imageService.create(Image.builder().image(blob).build());
         return "created";
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateImage(@PathVariable Long id, @RequestBody AddFileRequest request) {
+        try {
+            // Verificar si la imagen existe
+            Image existingImage = imageService.viewById(id);
+            if (existingImage == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Obtener los bytes de la nueva imagen
+            byte[] newBytes = request.getFile().getBytes();
+
+            // Actualizar la imagen en la base de datos
+            Blob newBlob = new javax.sql.rowset.serial.SerialBlob(newBytes);
+            existingImage.setImage(newBlob);
+            imageService.update(existingImage);
+
+            return ResponseEntity.ok("Image updated successfully");
+        } catch (IOException | SQLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating image");
+        }
     }
 }
